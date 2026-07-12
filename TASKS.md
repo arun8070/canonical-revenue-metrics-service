@@ -88,10 +88,9 @@ credentials, do not skip a real API call and hardcode a fake response).
 
 **Must complete before submission**
 
-- [ ] `[HUMAN]` Confirm PayPal Sandbox developer app credentials (client ID
+- [x] `[HUMAN]` Confirm PayPal Sandbox developer app credentials (client ID
       + secret) are available and will be provided as env vars.
-      *Verification: credentials exist in a password manager / notes, not
-      yet in repo.*
+      *Verification: provided in `.env`; live OAuth returns HTTP 200.*
 - [ ] `[HUMAN]` Create a Supabase project (free tier) and obtain the
       Postgres connection string.
       *Verification: connection string obtained.*
@@ -183,23 +182,28 @@ account) block later phases but do not block scaffolding itself.
       `0F3444274G682183F`, status `COMPLETED`, gross USD 25.00).
       *Verification: already confirmed by human; do not re-verify manually,
       but do use this real captured transaction as a fixture/reference.*
-- [ ] `[HUMAN]` Confirm current PayPal Sandbox client ID/secret are valid
+- [x] `[HUMAN]` Confirm current PayPal Sandbox client ID/secret are valid
       and set as env vars for the running service.
-      *Verification: a live OAuth token request from the service succeeds.*
-- [ ] `[AI]` Implement PayPal OAuth token fetch (with basic retry/backoff
+      *Verification: live OAuth token request returned HTTP 200 with a token
+      (after the user corrected the initially-duplicated id/secret).*
+- [x] `[AI]` Implement PayPal OAuth token fetch (with basic retry/backoff
       on transient failure).
-      *Verification: unit/integration test or manual run obtains a token.*
-- [ ] `[AI]` Implement `POST /api/import/paypal` to fetch capture(s) and
+      *Verification: `paypal/client.ts` getAccessToken() — caches until near
+      expiry, retries transient (5xx/429/network) with exponential backoff;
+      obtained a live token.*
+- [x] `[AI]` Implement `POST /api/import/paypal` to fetch capture(s) and
       normalize into canonical schema, using **capture ID** as
       `external_id` and order ID as `parent_external_id`.
-      *Verification: importing the known real capture produces exactly one
-      row with `canonical_status = COLLECTED` and gross amount in minor
-      units.*
-- [ ] `[AI]` Implement PayPal status mapping: only `COMPLETED` ->
+      *Verification: live import of real order 1A876373MX123143G produced
+      exactly one row — external_id 0F3444274G682183F, parent = order id,
+      canonical_status COLLECTED, gross_amount_minor 2500 (USD 25.00).*
+- [x] `[AI]` Implement PayPal status mapping: only `COMPLETED` ->
       `COLLECTED`; everything else explicitly mapped or `UNKNOWN`.
-      *Verification: test with `CREATED`/`APPROVED` asserts not collected.*
-- [ ] `[AI]` Store raw PayPal payload in `raw_payload`.
-      *Verification: DB row contains full raw JSON.*
+      *Verification: status-mapping + adapter tests — COMPLETED→COLLECTED,
+      PENDING→PENDING (non-collected), CREATED/APPROVED→UNKNOWN.*
+- [x] `[AI]` Store raw PayPal payload in `raw_payload`.
+      *Verification: adapter sets rawPayload = capture; raw_payload is NOT
+      NULL and the live insert succeeded with the capture JSON stored.*
 
 ---
 
@@ -230,11 +234,11 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [~] `[AI]` Implement upsert-on-conflict logic keyed on
+- [x] `[AI]` Implement upsert-on-conflict logic keyed on
       `(source, external_id)` for both import paths.
       *Verification: `transactions/repository.ts` upsert (ON CONFLICT DO
-      NOTHING) done + proven idempotent for seeded (2nd run inserts 0).
-      PayPal path pending Phase 3, then this flips to [x].*
+      NOTHING) used by BOTH seeded and PayPal imports; each proven idempotent
+      (2nd run inserts 0 / skips all).*
 - [x] `[AI]` Add test for concurrent duplicate import (e.g., two parallel
       import calls for the same data).
       *Verification: `concurrent-import.integration.test.ts` — two parallel
