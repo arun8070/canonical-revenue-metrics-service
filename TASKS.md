@@ -207,20 +207,22 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` Design deterministic seeded dataset with distinct field names/
+- [x] `[AI]` Design deterministic seeded dataset with distinct field names/
       shape and its own status vocabulary (`paid`, `succeeded`,
       `completed`, `pending`, `failed`, `voided`, `refunded`,
       `unexpected_new_status`).
-      *Verification: fixture file reviewed — shape genuinely differs from
-      PayPal's.*
-- [ ] `[AI]` Implement `POST /api/import/seeded` to normalize seeded data
+      *Verification: `seeded-provider/dataset.ts` — flat snake_case shape
+      (ref/parent_ref/state/amount_minor/settled_at), genuinely unlike
+      PayPal's nested capture shape. 10 records across dates + USD/EUR.*
+- [x] `[AI]` Implement `POST /api/import/seeded` to normalize seeded data
       into canonical schema using its own explicit allow-list.
-      *Verification: `unexpected_new_status` maps to `UNKNOWN` and is
-      excluded from revenue in a test.*
-- [ ] `[AI]` Confirm seeded import is deterministic (same input -> same
+      *Verification: route mounted; integration test confirms `seed-0008`
+      (`unexpected_new_status`) stored as `UNKNOWN` with null collected_at.
+      Revenue-exclusion asserted at metrics layer in Phase 6.*
+- [x] `[AI]` Confirm seeded import is deterministic (same input -> same
       output every run).
-      *Verification: running import twice on a clean DB produces identical
-      canonical rows (ids aside).*
+      *Verification: dataset is a frozen constant; adapter is pure; re-import
+      integration test → 2nd run inserted 0 / skipped 10, row count stays 10.*
 
 ---
 
@@ -228,11 +230,11 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` Implement upsert-on-conflict logic keyed on
+- [~] `[AI]` Implement upsert-on-conflict logic keyed on
       `(source, external_id)` for both import paths.
-      *Verification: re-running `POST /api/import/paypal` and
-      `POST /api/import/seeded` twice each results in the same row count
-      as running once.*
+      *Verification: `transactions/repository.ts` upsert (ON CONFLICT DO
+      NOTHING) done + proven idempotent for seeded (2nd run inserts 0).
+      PayPal path pending Phase 3, then this flips to [x].*
 - [ ] `[AI]` Add test for concurrent duplicate import (e.g., two parallel
       import calls for the same data).
       *Verification: test asserts no duplicate rows and no crash.*

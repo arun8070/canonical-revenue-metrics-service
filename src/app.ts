@@ -2,6 +2,8 @@ import express, { type Express } from 'express';
 import { pinoHttp } from 'pino-http';
 import { logger } from './logging/logger.js';
 import { healthRouter } from './routes/health.js';
+import { importRouter } from './routes/import.js';
+import { errorHandler } from './routes/error-handler.js';
 
 /**
  * Build the Express application. Kept free of `listen()` so tests can import
@@ -14,6 +16,10 @@ export function createApp(): Express {
   app.use(pinoHttp({ logger }));
 
   app.use(healthRouter);
+  app.use(importRouter);
+
+  // Terminal error middleware — must be registered last.
+  app.use(errorHandler);
 
   return app;
 }

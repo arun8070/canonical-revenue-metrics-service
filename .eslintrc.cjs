@@ -13,5 +13,11 @@ module.exports = {
   rules: {
     // Enforce CLAUDE.md §6: no `any` unless justified with a comment.
     '@typescript-eslint/no-explicit-any': 'warn',
+    // Allow intentionally-unused args/vars when prefixed with `_`
+    // (e.g. Express's required 4-arg error-middleware signature).
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
   },
 };
