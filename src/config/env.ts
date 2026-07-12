@@ -14,7 +14,10 @@ const EnvSchema = z.object({
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
     .default('info'),
-  DATABASE_URL: z.string().url().optional(),
+  // Not `.url()`: Supabase passwords can contain characters illegal in URL
+  // userinfo (`/`, `^`, …). We validate/parse it structurally in
+  // database/pool.ts instead of rejecting a legitimate connection string here.
+  DATABASE_URL: z.string().min(1).optional(),
   PAYPAL_CLIENT_ID: z.string().min(1).optional(),
   PAYPAL_CLIENT_SECRET: z.string().min(1).optional(),
   PAYPAL_API_BASE: z

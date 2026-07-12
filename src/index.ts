@@ -1,11 +1,4 @@
-// Load .env if present (no-op when absent, e.g. in production where env vars
-// are injected by the platform). process.loadEnvFile is available on Node 20.12+.
-try {
-  process.loadEnvFile();
-} catch {
-  // No .env file — rely on the ambient environment.
-}
-
+import './config/load-dotenv.js';
 import { createApp } from './app.js';
 import { loadEnv } from './config/env.js';
 import { logger } from './logging/logger.js';

@@ -64,9 +64,9 @@ credentials, do not skip a real API call and hardcode a fake response).
 
 ## Blockers
 
-- [!] `[HUMAN]` Supabase project not yet confirmed created / connection
-      string not yet provided to environment config. **Blocks all of
-      Phase 1 onward.**
+- [x] `[HUMAN]` Supabase project created / connection string provided in
+      `.env`. Confirmed live: connected to PostgreSQL 17.6, migration applied.
+      **(Resolved — no longer blocks Phase 1.)**
 - [!] `[HUMAN]` Render account/service not yet confirmed created. **Blocks
       Phase 10.**
 
@@ -127,23 +127,27 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [!] `[AI]` Depends on: Supabase connection string from Phase 0 `[HUMAN]`.
-      **Do not proceed with migrations until the human confirms the
-      connection string is set in the environment.**
-- [ ] `[AI]` Design canonical `transactions` table (fields per CLAUDE.md
+- [x] `[AI]` Depends on: Supabase connection string from Phase 0 `[HUMAN]`.
+      **Resolved — connection string set in `.env`, live connectivity
+      verified (PostgreSQL 17.6).**
+- [x] `[AI]` Design canonical `transactions` table (fields per CLAUDE.md
       §9–10: id, source, external_id, parent_external_id, amount_minor,
       currency, raw_status, canonical_status, collected_at,
       source_created_at, gross_amount_minor, fee_amount_minor,
       net_amount_minor, raw_payload, created_at, updated_at).
-      *Verification: migration file reviewed against CLAUDE.md money and
-      status rules.*
-- [ ] `[AI]` Add unique constraint on `(source, external_id)`.
-      *Verification: inserting a duplicate row via SQL fails or is
-      no-op'd as expected.*
-- [ ] `[AI]` Apply migration to Supabase instance.
-      *Verification: table visible in Supabase dashboard / via `psql`.*
-- [ ] `[AI+HUMAN]` Human spot-checks the schema in the Supabase dashboard.
-      *Verification: human confirms table + constraint look correct.*
+      *Verification: `migrations/0001_init.sql` — all 16 columns confirmed via
+      information_schema; money in bigint minor units; currency ISO-4217 check;
+      canonical_status closed CHECK set; collected_at only on COLLECTED;
+      gross=net+fee reconcile guard. Revenue reads gross_amount_minor only.*
+- [x] `[AI]` Add unique constraint on `(source, external_id)`.
+      *Verification: `transactions_source_external_unique` present; duplicate
+      insert rejected with SQLSTATE 23505 (unique_violation).*
+- [x] `[AI]` Apply migration to Supabase instance.
+      *Verification: `npm run migrate` applied 0001_init.sql; table + all
+      constraints confirmed via live queries against Supabase.*
+- [~] `[AI+HUMAN]` Human spot-checks the schema in the Supabase dashboard.
+      *Ready for review: open Supabase → Table Editor → `transactions`.
+      Awaiting human confirmation before marking [x].*
 
 ---
 
