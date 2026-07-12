@@ -3,6 +3,8 @@ import { pinoHttp } from 'pino-http';
 import { logger } from './logging/logger.js';
 import { healthRouter } from './routes/health.js';
 import { importRouter } from './routes/import.js';
+import { metricsRouter } from './routes/metrics.js';
+import { transactionsRouter } from './routes/transactions.js';
 import { errorHandler } from './routes/error-handler.js';
 
 /**
@@ -17,6 +19,8 @@ export function createApp(): Express {
 
   app.use(healthRouter);
   app.use(importRouter);
+  app.use(metricsRouter);
+  app.use(transactionsRouter);
 
   // Terminal error middleware — must be registered last.
   app.use(errorHandler);

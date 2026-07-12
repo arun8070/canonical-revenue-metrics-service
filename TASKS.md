@@ -245,19 +245,21 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` Implement one canonical revenue query/service function used by
+- [x] `[AI]` Implement one canonical revenue query/service function used by
       every metrics endpoint (no duplicated revenue logic anywhere).
-      *Verification: code review confirms summary and breakdown both call
-      the same function/query module.*
-- [ ] `[AI]` Revenue definition: sum of `gross_amount_minor` (or
+      *Verification: `src/metrics/revenue.ts` — summary + breakdown both build
+      from shared fragments (COLLECTED_FILTER, REVENUE_SUM=gross, RANGE_FILTER).
+      Both routes call this module; no revenue SQL exists elsewhere.*
+- [x] `[AI]` Revenue definition: sum of `gross_amount_minor` (or
       `amount_minor` where gross applies) for rows where
       `canonical_status = COLLECTED`, filtered by date range and currency.
-      *Verification: unit test with known fixtures matches expected total.*
-- [ ] `[AI]` Add a "drift guard" test: assert that summary total always
+      *Verification: integration test — USD July total = 4100 (COLLECTED gross
+      only); dedicated gross-not-net test asserts 1000 gross, not 800 net.*
+- [x] `[AI]` Add a "drift guard" test: assert that summary total always
       equals sum of breakdown totals for a range of test scenarios,
       including after adding a new status/source in test fixtures.
-      *Verification: test fails if someone reimplements revenue math a
-      second way; currently passes.*
+      *Verification: drift-guard test asserts summary == Σ breakdown for BOTH
+      day and week intervals, at service level and via HTTP endpoints.*
 
 ---
 
@@ -265,17 +267,19 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` `GET /api/transactions` (basic list/filter, for debugging/demo).
-      *Verification: returns normalized rows from both sources.*
-- [ ] `[AI]` `GET /api/metrics/revenue/summary?from=&to=&currency=`.
-      *Verification: returns correct total for known fixture date range.*
-- [ ] `[AI]` `GET /api/metrics/revenue/breakdown?from=&to=&currency=&interval=day|week`.
-      *Verification: sum of breakdown rows equals summary total for the
-      same range.*
-- [ ] `[AI]` Zod validation on all query params; invalid date range or
+- [x] `[AI]` `GET /api/transactions` (basic list/filter, for debugging/demo).
+      *Verification: HTTP test — `?source=seeded` returns 10 normalized rows
+      with canonical_status; raw_payload omitted from listing.*
+- [x] `[AI]` `GET /api/metrics/revenue/summary?from=&to=&currency=`.
+      *Verification: HTTP test — USD July → totalMinor 4100, count 4;
+      currency `usd` echoed back as `USD`.*
+- [x] `[AI]` `GET /api/metrics/revenue/breakdown?from=&to=&currency=&interval=day|week`.
+      *Verification: HTTP test — buckets sum equals summary totalMinor for the
+      same range; interval echoed.*
+- [x] `[AI]` Zod validation on all query params; invalid date range or
       unsupported/missing currency returns a structured 4xx error.
-      *Verification: test hits endpoint with bad input, asserts 4xx with
-      clear message, not 500.*
+      *Verification: HTTP tests — missing currency, invalid date, from>=to,
+      bad interval, invalid source all return 400 `validation_error` (not 500).*
 
 ---
 
