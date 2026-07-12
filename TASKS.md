@@ -50,6 +50,12 @@ credentials, do not skip a real API call and hardcode a fake response).
 - Modular monolith selected instead of microservices.
 - Unknown statuses excluded from revenue by default (allow-list, not
   exclusion-list).
+- Idempotency conflict strategy: `ON CONFLICT DO NOTHING` (CLAUDE.md §8
+  default). Re-import is a pure idempotency guard, not a status refresh.
+  `DO UPDATE` was considered and deliberately not chosen for this scope.
+- Refunds handled as a simplified current-state metric: REFUNDED /
+  PARTIALLY_REFUNDED are non-collected and excluded via status; refunds are
+  not modeled as separate negative events (out of scope).
 - PayPal Sandbox flow already verified manually by the human before this
   file was created (OAuth, order creation, buyer approval, capture) —
   see Phase 3.

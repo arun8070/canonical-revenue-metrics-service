@@ -144,7 +144,19 @@ deterministically by fixture tests based on the real captured transaction.
   `UNKNOWN`. Matching is exact — a changed spelling/case is treated as new
   (safe: it can only *under*-count, never over-count revenue).
 - **Idempotency via the DB unique constraint** `(source, external_id)`, not
-  application locking — so concurrent imports are safe too.
+  application locking — so concurrent imports are safe too. Conflicts use
+  `ON CONFLICT DO NOTHING` (CLAUDE.md §8 default): a re-import is a **pure
+  idempotency guard**, not a refresh. A provider-side status change (e.g.
+  `COMPLETED → REFUNDED`) is therefore *not* rewritten into an existing row on
+  re-import. The reviewed alternative — `DO UPDATE` refreshing status/amounts —
+  was considered and deliberately not chosen for this scope; it is the change
+  to make if live in-place status transitions become a requirement.
+- **Refunds are a simplified current-state metric.** `REFUNDED` (and
+  `PARTIALLY_REFUNDED`) map to non-collected canonical statuses and simply do
+  not count toward revenue. Refunds are **not** modeled as separate negative
+  financial events, and a refund does not retroactively rewrite the original
+  capture row (see idempotency note above). A production system would likely
+  record refunds as distinct signed events; that is intentionally out of scope.
 - **No auth on import endpoints** — a documented trade-off for this assignment,
   not a production stance.
 - **No FX / cross-currency aggregation** — queries are single-currency by
