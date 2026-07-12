@@ -67,9 +67,9 @@ credentials, do not skip a real API call and hardcode a fake response).
 - [x] `[HUMAN]` Supabase project created / connection string provided in
       `.env`. Confirmed live: connected to PostgreSQL 17.6, migration applied.
       **(Resolved — no longer blocks Phase 1.)**
-- [~] `[HUMAN]` Render account exists; public GitHub repo created + pushed
-      (arun8070/canonical-revenue-metrics-service). Remaining: create the
-      Render Web Service from the repo, set secret env vars, deploy.
+- [x] Deployment complete. Live on Render + Supabase:
+      https://canonical-revenue-metrics-service.onrender.com
+      (repo arun8070/canonical-revenue-metrics-service). Verified live.
 
 *(Update this section as blockers are resolved or new ones appear.)*
 
@@ -362,23 +362,31 @@ check, before being marked `[x]`.)*
 
 **Must complete before submission**
 
-- [!] `[HUMAN]` Confirm Supabase project connection string is set as an
-      env var in Render's environment settings. **Blocks deploy.**
-- [!] `[HUMAN]` Confirm PayPal Sandbox credentials are set as env vars in
-      Render's environment settings. **Blocks deploy.**
+- [x] `[HUMAN]` Confirm Supabase project connection string is set as an
+      env var in Render's environment settings.
+      *Verification: DATABASE_URL set in Render (Supabase **Session pooler**,
+      IPv4 — required since Render free tier is IPv4-only and the direct
+      Supabase host is IPv6-only). Live queries succeed.*
+- [x] `[HUMAN]` Confirm PayPal Sandbox credentials are set as env vars in
+      Render's environment settings.
+      *Verification: PAYPAL_CLIENT_ID/SECRET set in Render; live PayPal import
+      against the deployed instance succeeded.*
 - [x] `[AI]` Add build/start scripts suitable for Render (e.g.,
       `npm run build` + `npm start`).
       *Verification: `render.yaml` blueprint (build `npm ci --include=dev &&
       npm run build`; start `npm run migrate:prod && npm start`;
       healthCheckPath /health). Compiled `migrate:prod` verified locally
       (idempotent, applied:0).*
-- [ ] `[HUMAN]` Create the Render Web Service, connect the GitHub repo, set
+- [x] `[HUMAN]` Create the Render Web Service, connect the GitHub repo, set
       env vars, deploy.
-      *Verification: Render dashboard shows a successful deploy.*
-- [ ] `[AI+HUMAN]` Hit the live `/health` endpoint and at least one metrics
+      *Verification: service Live at
+      https://canonical-revenue-metrics-service.onrender.com (Render shows
+      "Live"; health checks returning 200).*
+- [x] `[AI+HUMAN]` Hit the live `/health` endpoint and at least one metrics
       endpoint on the deployed URL.
-      *Verification: human confirms real responses from the live URL, not
-      localhost.*
+      *Verification: live `/health`→200; seeded+PayPal imports→200; summary USD
+      July = 6600 across BOTH sources (count 5); breakdown buckets sum to 6600;
+      missing-currency→400. All against the deployed URL, not localhost.*
 
 ---
 

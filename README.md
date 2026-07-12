@@ -8,7 +8,8 @@ collected revenue** for any date range using **one canonical definition of
 The engineering property it demonstrates: **the same number, computed the same
 way, everywhere** — even as new sources or new statuses appear.
 
-- **Live URL:** _(add after deploy — see Deployment)_
+- **Live URL:** https://canonical-revenue-metrics-service.onrender.com
+  (free tier — first request after idle may take ~50s to wake)
 - **Stack:** TypeScript (strict) · Express · PostgreSQL (Supabase) · Pino · Zod · Vitest
 - **Deploy:** Render (Web Service) + Supabase Postgres
 
@@ -57,7 +58,7 @@ structured `400`, never a `500` or a silent default.
 ### Example requests
 
 ```bash
-BASE_URL=http://localhost:3000   # or your live Render URL
+BASE_URL=https://canonical-revenue-metrics-service.onrender.com   # or http://localhost:3000
 
 # Health
 curl "$BASE_URL/health"
