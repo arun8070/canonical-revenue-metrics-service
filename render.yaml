@@ -1,0 +1,28 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec)
+# One public Web Service backed by external Supabase Postgres.
+services:
+  - type: web
+    name: canonical-revenue-metrics-service
+    runtime: node
+    plan: free
+    # --include=dev so TypeScript/build tooling is available (Render sets
+    # NODE_ENV=production, which would otherwise prune devDependencies and
+    # break `tsc`). Runtime uses only compiled JS + prod deps.
+    buildCommand: npm ci --include=dev && npm run build
+    # Apply migrations (compiled, no tsx needed) then start the server.
+    startCommand: npm run migrate:prod && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20.20.1"
+      - key: LOG_LEVEL
+        value: info
+      - key: PAYPAL_API_BASE
+        value: https://api-m.sandbox.paypal.com
+      # Secrets — set these in the Render dashboard, not in the blueprint.
+      - key: DATABASE_URL
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false

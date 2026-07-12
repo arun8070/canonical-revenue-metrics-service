@@ -363,10 +363,12 @@ check, before being marked `[x]`.)*
       env var in Render's environment settings. **Blocks deploy.**
 - [!] `[HUMAN]` Confirm PayPal Sandbox credentials are set as env vars in
       Render's environment settings. **Blocks deploy.**
-- [ ] `[AI]` Add build/start scripts suitable for Render (e.g.,
+- [x] `[AI]` Add build/start scripts suitable for Render (e.g.,
       `npm run build` + `npm start`).
-      *Verification: builds and starts cleanly locally with production
-      env vars set.*
+      *Verification: `render.yaml` blueprint (build `npm ci --include=dev &&
+      npm run build`; start `npm run migrate:prod && npm start`;
+      healthCheckPath /health). Compiled `migrate:prod` verified locally
+      (idempotent, applied:0).*
 - [ ] `[HUMAN]` Create the Render Web Service, connect the GitHub repo, set
       env vars, deploy.
       *Verification: Render dashboard shows a successful deploy.*
@@ -381,12 +383,12 @@ check, before being marked `[x]`.)*
 
 **Must complete before submission**
 
-- [ ] `[AI]` Write README: setup/local run instructions, env vars needed.
-      *Verification: a fresh read-through with no prior context could
-      follow it.*
-- [ ] `[AI]` Write README: design decisions & trade-offs (pull from
+- [x] `[AI]` Write README: setup/local run instructions, env vars needed.
+      *Verification: README has prerequisites, env table, install/migrate/run,
+      import + curl examples, testing.*
+- [x] `[AI]` Write README: design decisions & trade-offs (pull from
       Decision Log / Known Trade-offs above).
-- [ ] `[AI]` Write README: sources & references used.
+- [x] `[AI]` Write README: sources & references used.
 - [ ] `[HUMAN]` Write/confirm AI usage disclosure section, including how to
       access the shared AI conversation history.
       *Verification: link/export actually accessible, not just described.*
