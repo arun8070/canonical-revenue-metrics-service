@@ -155,16 +155,21 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` Define canonical status enum: `COLLECTED`, `PENDING`, `FAILED`,
+- [x] `[AI]` Define canonical status enum: `COLLECTED`, `PENDING`, `FAILED`,
       `REFUNDED`, `VOIDED`, `UNKNOWN`.
-      *Verification: type-checked enum used consistently across codebase.*
-- [ ] `[AI]` Define canonical transaction TypeScript type + Zod schema.
-      *Verification: schema compiles and validates a sample record.*
-- [ ] `[AI]` Implement per-source status allow-list mapping functions
+      *Verification: `src/transactions/canonical-status.ts` — const tuple +
+      Zod enum + single `isCollected()`. Typecheck passes; used by schema,
+      allow-lists, and tests.*
+- [x] `[AI]` Define canonical transaction TypeScript type + Zod schema.
+      *Verification: `src/transactions/transaction.ts`; 10 schema tests pass
+      (valid record accepted; collectedAt/COLLECTED consistency, gross=net+fee,
+      negatives, floats, ISO-4217 currency, strict extra-key rejection).*
+- [x] `[AI]` Implement per-source status allow-list mapping functions
       (PayPal, seeded) returning `UNKNOWN` for anything not explicitly
       listed.
-      *Verification: unit test feeds an unrecognized status and asserts
-      `UNKNOWN`.*
+      *Verification: 9 status-mapping tests pass, incl. unrecognized status →
+      UNKNOWN, wrong-case → UNKNOWN, and cross-source vocabulary isolation.
+      Fall-through to UNKNOWN is logged (CLAUDE.md §15).*
 
 ---
 
