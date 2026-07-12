@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { mapPaypalStatus } from '../src/integrations/paypal/status.js';
 import { mapSeededStatus } from '../src/integrations/seeded-provider/status.js';
+import { mapStatus } from '../src/integrations/status-map.js';
 import { isCollected } from '../src/transactions/canonical-status.js';
 
 describe('PayPal status allow-list', () => {
@@ -60,5 +61,17 @@ describe('Seeded provider status allow-list', () => {
     // PayPal's COMPLETED is not a seeded status; seeded's paid is not PayPal's.
     expect(mapSeededStatus('COMPLETED')).toBe('UNKNOWN');
     expect(mapPaypalStatus('paid')).toBe('UNKNOWN');
+  });
+});
+
+describe('a new source with no status policy fails safely', () => {
+  test('an empty allow-list maps every status to UNKNOWN (never COLLECTED)', () => {
+    // A brand-new source added without defining an allow-list must never
+    // default to counting as collected (CLAUDE.md §10).
+    for (const raw of ['paid', 'COMPLETED', 'anything', 'succeeded', '']) {
+      const mapped = mapStatus('brand-new-source', {}, raw);
+      expect(mapped).toBe('UNKNOWN');
+      expect(isCollected(mapped)).toBe(false);
+    }
   });
 });

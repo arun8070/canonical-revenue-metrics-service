@@ -235,9 +235,11 @@ account) block later phases but do not block scaffolding itself.
       *Verification: `transactions/repository.ts` upsert (ON CONFLICT DO
       NOTHING) done + proven idempotent for seeded (2nd run inserts 0).
       PayPal path pending Phase 3, then this flips to [x].*
-- [ ] `[AI]` Add test for concurrent duplicate import (e.g., two parallel
+- [x] `[AI]` Add test for concurrent duplicate import (e.g., two parallel
       import calls for the same data).
-      *Verification: test asserts no duplicate rows and no crash.*
+      *Verification: `concurrent-import.integration.test.ts` — two parallel
+      importSeeded() on separate pool connections; final count 10, combined
+      inserts 10, no crash (DB unique constraint, not app locking).*
 
 ---
 
@@ -287,22 +289,37 @@ account) block later phases but do not block scaffolding itself.
 
 **Must complete before submission**
 
-- [ ] `[AI]` PayPal `COMPLETED` counts as collected.
-- [ ] `[AI]` PayPal `CREATED`/`APPROVED` do not count as collected.
-- [ ] `[AI]` Seeded `paid`/`succeeded`/`completed` count only when
+- [x] `[AI]` PayPal `COMPLETED` counts as collected.
+      *status-mapping test: COMPLETED → COLLECTED, isCollected true.
+      (Full import→revenue row additionally covered in Phase 3.)*
+- [x] `[AI]` PayPal `CREATED`/`APPROVED` do not count as collected.
+      *status-mapping test: both → UNKNOWN, isCollected false.*
+- [x] `[AI]` Seeded `paid`/`succeeded`/`completed` count only when
       explicitly allow-listed.
-- [ ] `[AI]` Seeded `pending`/`failed`/`voided`/`refunded` do not count.
-- [ ] `[AI]` Seeded `unexpected_new_status` maps to `UNKNOWN`, excluded.
-- [ ] `[AI]` Re-importing same external transaction creates one row only.
-- [ ] `[AI]` Concurrent duplicate imports remain idempotent.
-- [ ] `[AI]` Summary total equals sum of breakdown totals.
-- [ ] `[AI]` New source without a status policy fails safely / maps to
+      *status-mapping test + revenue test (USD 4100 includes exactly these).*
+- [x] `[AI]` Seeded `pending`/`failed`/`voided`/`refunded` do not count.
+      *status-mapping test + revenue exclusion (excluded from USD 4100).*
+- [x] `[AI]` Seeded `unexpected_new_status` maps to `UNKNOWN`, excluded.
+      *mapping + seeded-import integration (stored UNKNOWN) + revenue exclusion.*
+- [x] `[AI]` Re-importing same external transaction creates one row only.
+      *seeded-import integration: 2nd run inserts 0 / skips 10, count stays 10.*
+- [x] `[AI]` Concurrent duplicate imports remain idempotent.
+      *concurrent-import integration: parallel imports → 10 rows, combined
+      inserts 10, no crash.*
+- [x] `[AI]` Summary total equals sum of breakdown totals.
+      *drift-guard test (day + week), at service and HTTP levels.*
+- [x] `[AI]` New source without a status policy fails safely / maps to
       `UNKNOWN`.
-- [ ] `[AI]` Different currencies are not silently combined.
-- [ ] `[AI]` Invalid dates are rejected.
-- [ ] `[AI]` Date-range boundary behavior is tested (inclusive/exclusive
+      *status-map test: empty allow-list maps every status to UNKNOWN.*
+- [x] `[AI]` Different currencies are not silently combined.
+      *revenue test: USD 4100 and EUR 3000 queried independently, never 7100.*
+- [x] `[AI]` Invalid dates are rejected.
+      *HTTP test: `from=not-a-date` and `from>=to` → 400 validation_error.*
+- [x] `[AI]` Date-range boundary behavior is tested (inclusive/exclusive
       edges).
-- [ ] `[AI]` Gross amount, not net amount, is used in revenue calculation.
+      *revenue test: inclusive `from`, exclusive `to` both asserted at edges.*
+- [x] `[AI]` Gross amount, not net amount, is used in revenue calculation.
+      *revenue test: gross=1000/net=800 row → total 1000, not 800.*
 
 *(Each item above must be an actual passing automated test, not a manual
 check, before being marked `[x]`.)*
