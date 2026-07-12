@@ -67,8 +67,9 @@ credentials, do not skip a real API call and hardcode a fake response).
 - [x] `[HUMAN]` Supabase project created / connection string provided in
       `.env`. Confirmed live: connected to PostgreSQL 17.6, migration applied.
       **(Resolved — no longer blocks Phase 1.)**
-- [!] `[HUMAN]` Render account/service not yet confirmed created. **Blocks
-      Phase 10.**
+- [~] `[HUMAN]` Render account exists; public GitHub repo created + pushed
+      (arun8070/canonical-revenue-metrics-service). Remaining: create the
+      Render Web Service from the repo, set secret env vars, deploy.
 
 *(Update this section as blockers are resolved or new ones appear.)*
 
@@ -94,10 +95,12 @@ credentials, do not skip a real API call and hardcode a fake response).
 - [ ] `[HUMAN]` Create a Supabase project (free tier) and obtain the
       Postgres connection string.
       *Verification: connection string obtained.*
-- [ ] `[HUMAN]` Create a Render account (free tier) if not already done.
-      *Verification: account exists and can create a new Web Service.*
-- [ ] `[HUMAN]` Create a public GitHub repository for this project.
-      *Verification: repo exists, empty or initialized.*
+- [x] `[HUMAN]` Create a Render account (free tier) if not already done.
+      *Verification: account exists (user reached the New Web Service flow).*
+- [x] `[HUMAN]` Create a public GitHub repository for this project.
+      *Verification: created + pushed via gh under arun8070:
+      https://github.com/arun8070/canonical-revenue-metrics-service
+      (10 commits, .env confirmed absent on remote).*
 - [x] `[AI]` Initialize Node.js + TypeScript project (package.json,
       tsconfig, lint/format config).
       *Verification: `npm run build` succeeds; `npm run lint` exits 0.
