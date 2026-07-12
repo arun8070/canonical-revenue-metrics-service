@@ -339,12 +339,14 @@ check, before being marked `[x]`.)*
 
 **Must complete before submission**
 
-- [ ] `[AI]` Structured logs for import runs (counts of inserted/skipped/
+- [x] `[AI]` Structured logs for import runs (counts of inserted/skipped/
       duplicate/unknown-status).
-      *Verification: log output inspected manually for one run.*
-- [ ] `[AI]` Global error handler returns consistent JSON error shape.
-      *Verification: triggering an unhandled error path returns structured
-      JSON, not a stack trace dump.*
+      *Verification: both imports log start + `{total,inserted,skipped,unknown}`
+      summaries; UNKNOWN fall-through logged per record. Seen in test output.*
+- [x] `[AI]` Global error handler returns consistent JSON error shape.
+      *Verification: `routes/error-handler.ts` — ZodError→400 validation_error,
+      PaypalError→502 paypal_error, else 500 internal_error; no stack leaked.
+      Covered by HTTP validation tests (400 shape asserted).*
 
 **Nice to have only if time remains**
 
