@@ -14,9 +14,19 @@ Live service: **https://canonical-revenue-metrics-service.onrender.com**
    # If `jq` isn't installed, replace `| jq` with `| python3 -m json.tool`
    ```
 3. Have two things open: a terminal, and the file `src/metrics/revenue.ts` (the single canonical definition).
+4. **(Recommended) Reset to empty** so the first import shows real inserts on
+   camera. Either run `npm run reset` locally, or in the Supabase SQL Editor run
+   `TRUNCATE TABLE transactions;`. (Skip this if you'd rather demo against
+   already-loaded data — then imports will show `inserted: 0, skipped: N`.)
 
-The live DB already holds the demo data (10 seeded + 1 real PayPal). Expected
-USD/July total is **6600 minor units ($66.00)** across **both** sources.
+Expected USD/July total after importing both sources is **6600 minor units
+($66.00)** across **both** PayPal and the seeded provider.
+
+### Reset between takes
+
+To re-run the demo cleanly, empty the table again with `npm run reset` (or
+`TRUNCATE TABLE transactions;`) and repeat the imports. The schema and
+migrations stay intact — no re-migration needed.
 
 ---
 
@@ -49,28 +59,27 @@ curl -s -X POST -H 'Content-Type: application/json' \
   -d '{"orderIds":["1A876373MX123143G"]}' \
   $BASE/api/import/paypal | jq
 ```
-> "That's a real Sandbox capture. Note we key on the **capture ID**, not the
-> order ID — the capture is the actual money movement. It's stored with the
-> gross amount in minor units. Because it's already imported, watch —"
+> "That's a real Sandbox capture — `inserted: 1`. Note we key on the **capture
+> ID**, not the order ID; the capture is the actual money movement. It's stored
+> with the gross amount in minor units. Now watch idempotency —"
 
-Run it **again** to show idempotency:
+Run the **exact same call again**:
 ```bash
 curl -s -X POST -H 'Content-Type: application/json' \
   -d '{"orderIds":["1A876373MX123143G"]}' \
   $BASE/api/import/paypal | jq
 ```
 > "`inserted: 0, skipped: 1`. Re-importing never double-counts —
-> `UNIQUE(source, external_id)` at the database."
+> `UNIQUE(source, external_id)` at the database, so revenue can't be inflated."
 
 ## Beat 5 — Import the seeded provider (25s)
 
 ```bash
 curl -s -X POST $BASE/api/import/seeded | jq
 ```
-> "Completely different shape and status vocabulary — `paid`, `succeeded`,
-> `completed`. `inserted: 0, skipped: 10` here too because it's deterministic
-> and already loaded. Note `unknown: 1` — one record has a status we don't
-> recognize. Hold that thought."
+> "A completely different shape and status vocabulary — `paid`, `succeeded`,
+> `completed`. `inserted: 10`. Note `unknown: 1` — one record has a status we
+> don't recognize. Hold that thought."
 
 ## Beat 6 — The one number, across both sources (30s)
 
@@ -118,12 +127,18 @@ curl -s "$BASE/api/metrics/revenue/summary?from=2026-07-01&to=2026-08-01" | jq
 
 ## Quick reference — expected results
 
+Assumes you reset to empty before recording (Beat 0).
+
 | Call | Expected |
 |------|----------|
 | `/health` | `{"status":"ok",...}` |
-| PayPal import (2nd run) | `inserted: 0, skipped: 1` |
-| Seeded import (2nd run) | `inserted: 0, skipped: 10, unknown: 1` |
+| PayPal import (1st run) | `inserted: 1, skipped: 0` |
+| PayPal import (2nd run) | `inserted: 0, skipped: 1` (idempotent) |
+| Seeded import (1st run) | `inserted: 10, skipped: 0, unknown: 1` |
 | Summary USD July | `totalMinor: 6600, collectedCount: 5` |
 | Breakdown USD July (day) | buckets sum to `6600` |
 | Transactions `status=UNKNOWN` | the `seed-0008` / `unexpected_new_status` row (8888), excluded from revenue |
 | Summary without `currency` | `400 validation_error` |
+
+> If you did **not** reset first, the import calls show `inserted: 0, skipped: N`
+> instead — still a valid demo (leads with idempotency), just narrate it that way.
