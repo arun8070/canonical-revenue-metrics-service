@@ -418,8 +418,10 @@ check, before being marked `[x]`.)*
 
 **Must complete before submission**
 
-- [ ] `[HUMAN]` Script the 5-minute demo: what to show, in what order
+- [~] `[HUMAN]` Script the 5-minute demo: what to show, in what order
       (see Demo Script Checklist below).
+      *Drafted in `docs/DEMO_SCRIPT.md` (timed beats + exact curls, all
+      verified live). Awaiting human review/use before recording.*
 - [ ] `[HUMAN]` Record demo video (max 5 minutes) against the **live**
       deployment, including at least one failure/edge case (e.g., unknown
       status excluded, or invalid date range rejected).
